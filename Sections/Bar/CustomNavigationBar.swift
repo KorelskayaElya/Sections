@@ -15,8 +15,8 @@ class CustomNavigationBar: UINavigationBar {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         label.textAlignment = .left
-        label.text = "Видео"
-        label.textColor = .black
+        label.text = titleLabelText
+        label.textColor = UIColor(named: "CustomBlack")
         return label
     }()
 
@@ -24,7 +24,7 @@ class CustomNavigationBar: UINavigationBar {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
         label.textAlignment = .left
-        label.text = "Мои"
+        label.text = myLabelText
         label.textColor = fontColor
         return label
     }()
@@ -38,14 +38,14 @@ class CustomNavigationBar: UINavigationBar {
     lazy var addButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "plus"), for: .normal)
-        button.tintColor = .black
+        button.tintColor = UIColor(named: "CustomBlack")
         return button
     }()
 
     lazy var searchButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
-        button.tintColor = .black
+        button.tintColor = UIColor(named: "CustomBlack")
         return button
     }()
 
@@ -57,14 +57,39 @@ class CustomNavigationBar: UINavigationBar {
         return collectionView
     }()
 
+    lazy var tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.backgroundColor = .systemBackground
+        tableView.isHidden = true
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.layer.cornerRadius = CGFloat(cornerRadiusTable)
+        tableView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        tableView.clipsToBounds = true
+        tableView.layer.masksToBounds = true
+        tableView.separatorStyle = .none
+        return tableView
+    }()
+
+    lazy var dimmingView: UIView = {
+        let view = UIView(frame: UIScreen.main.bounds)
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        view.isUserInteractionEnabled = true
+        return view
+    }()
+
     // MARK: - Properties
 
     var selectedSectionIndex: Int = 0
-    var sectionTitles = ["Для вас", "Тренды", "Подписки", "Трансляции", "Спорт", "Киберспорт и игры", "Фильмы", "Сериалы", "Детям", "Популярное"]
+    var sectionTitles = [""]
+    var titleLabelText = "Видео"
+    var myLabelText = "Мои"
     var fontSize: CGFloat = 14
     var fontColor: UIColor = .gray
     var underlineHeight: CGFloat = 2
+    var cornerRadiusTable = 15
     var underlineColor: UIColor = UIColor(red: 0.56, green: 0.7216, blue: 1, alpha: 1)
+    var isTableViewVisible = false
 
     // MARK: - Init
 
@@ -89,6 +114,7 @@ class CustomNavigationBar: UINavigationBar {
         addSubview(myLabel)
         addSubview(separatorView)
         addSubview(collectionView)
+        addSubview(tableView)
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addButton.translatesAutoresizingMaskIntoConstraints = false
@@ -97,6 +123,7 @@ class CustomNavigationBar: UINavigationBar {
         searchButton.translatesAutoresizingMaskIntoConstraints = false
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.showsHorizontalScrollIndicator = false
+        tableView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
@@ -121,6 +148,11 @@ class CustomNavigationBar: UINavigationBar {
             collectionView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -5),
             collectionView.centerYAnchor.constraint(equalTo: separatorView.centerYAnchor),
             collectionView.heightAnchor.constraint(equalTo: separatorView.heightAnchor),
+
+            tableView.topAnchor.constraint(equalTo: myLabel.bottomAnchor),
+            tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tableView.heightAnchor.constraint(equalToConstant: 132),
         ])
     }
 }
@@ -179,8 +211,66 @@ extension CustomNavigationBar: UICollectionViewDelegate, UICollectionViewDataSou
               let indexPath = collectionView.indexPath(for: cell) else {
             return
         }
+        
         selectedSectionIndex = indexPath.item
         collectionView.reloadData()
+        isTableViewVisible.toggle()
+        tableView.isHidden = !isTableViewVisible
+//        if !tableView.isHidden {
+//            addSubview(dimmingView)
+//            bringSubviewToFront(dimmingView)
+//            dimmingView.isHidden = false
+//        } else {
+//            dimmingView.isHidden = true
+//        }
+        tableView.reloadData()
     }
+
     
 }
+extension CustomNavigationBar: UITableViewDelegate, UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 3
+    }
+
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 44
+    }
+
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = UITableViewCell(style: .default, reuseIdentifier: nil)
+        switch indexPath.row {
+        case 0:
+            cell.textLabel?.text = "Для вас"
+            cell.tintColor = underlineColor
+            if let checkmarkImage = UIImage(systemName: "checkmark.circle.fill") {
+                let checkmarkImageView = UIImageView(image: checkmarkImage)
+                checkmarkImageView.tintColor = underlineColor
+                cell.accessoryView = checkmarkImageView
+            }
+            if let iconImage = UIImage(systemName: "list.bullet.rectangle.portrait.fill") {
+                cell.imageView?.image = iconImage
+                cell.imageView?.tintColor = underlineColor
+            }
+        case 1:
+            cell.textLabel?.text = "Друзья"
+            if let iconImage = UIImage(systemName: "person.2.fill") {
+                cell.imageView?.image = iconImage
+                cell.imageView?.tintColor = underlineColor
+            }
+        case 2:
+            cell.textLabel?.text = "Фотографии"
+            if let iconImage = UIImage(systemName: "photo") {
+                cell.imageView?.image = iconImage
+                cell.imageView?.tintColor = underlineColor
+            }
+        default:
+            break
+        }
+        cell.textLabel?.textColor = fontColor
+        cell.textLabel?.font =  UIFont.systemFont(ofSize: fontSize)
+        return cell
+    }
+}
+

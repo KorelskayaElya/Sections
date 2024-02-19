@@ -9,15 +9,9 @@ import UIKit
 
 class ViewController: UIViewController {
 
-    // MARK: - UI
+    // MARK: - Properties
 
-    lazy var collectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .white
-        return collectionView
-    }()
+    let customNavBar = CustomNavigationBar(frame: .zero)
 
     // MARK: - Lifecycle
 
@@ -25,27 +19,20 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         constraints()
+        customNavBar.sectionTitles = ["Для вас", "Тренды", "Подписки", "Трансляции", "Спорт", "Киберспорт и игры", "Фильмы", "Сериалы", "Детям", "Популярное"]
     }
 
     // MARK: - Private
 
     private func constraints() {
-        let customNavBar = CustomNavigationBar(frame: .zero)
         customNavBar.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(customNavBar)
-        view.addSubview(collectionView)
 
         NSLayoutConstraint.activate([
             customNavBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             customNavBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             customNavBar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             customNavBar.heightAnchor.constraint(equalToConstant: 100),
-
-            collectionView.topAnchor.constraint(equalTo: customNavBar.bottomAnchor),
-            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
 }
